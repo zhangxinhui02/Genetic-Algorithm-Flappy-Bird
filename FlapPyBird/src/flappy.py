@@ -18,7 +18,8 @@ from .utils import GameConfig, Images, Sounds, Window
 
 
 class Flappy:
-    def __init__(self):
+    def __init__(self, controller_tick):
+        self.controller_tick = controller_tick
         pygame.init()
         pygame.display.set_caption("Flappy Bird")
         window = Window(288, 512)
@@ -94,10 +95,12 @@ class Flappy:
                 if self.player.crossed(pipe):
                     self.score.add()
 
-            for event in pygame.event.get():
-                self.check_quit_event(event)
-                if self.is_tap_event(event):
-                    self.player.flap()
+            # for event in pygame.event.get():
+            #     self.check_quit_event(event)
+            #     if self.is_tap_event(event):
+            #         self.player.flap()
+            if self.controller_tick():
+                self.player.flap()
 
             self.background.tick()
             self.floor.tick()
