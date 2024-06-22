@@ -1,10 +1,8 @@
-import random
+import json
 from typing import List
 
 from ..utils import GameConfig
 from .entity import Entity
-
-random.seed(114514)
 
 
 class Pipe(Entity):
@@ -15,6 +13,11 @@ class Pipe(Entity):
     def draw(self) -> None:
         self.x += self.vel_x
         super().draw()
+
+
+with open('pipes.json', 'r', encoding='utf-8') as f:
+    static_pipes: list = json.load(f)
+current_pipe = 0
 
 
 class Pipes(Entity):
@@ -84,7 +87,12 @@ class Pipes(Entity):
         # y of gap between upper and lower pipe
         base_y = self.config.window.viewport_height
 
-        gap_y = random.randrange(0, int(base_y * 0.6 - self.pipe_gap))
+        global current_pipe
+        gap_y = static_pipes[current_pipe]
+        current_pipe += 1
+        if current_pipe >= len(static_pipes):
+            current_pipe = 0
+
         gap_y += int(base_y * 0.2)
         pipe_height = self.config.images.pipe[0].get_height()
         pipe_x = self.config.window.width + 10

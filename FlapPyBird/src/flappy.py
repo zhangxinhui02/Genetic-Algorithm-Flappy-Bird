@@ -1,5 +1,7 @@
 import asyncio
 import sys
+import json
+import time
 
 import pygame
 from pygame.locals import K_ESCAPE, K_SPACE, K_UP, KEYDOWN, QUIT
@@ -18,8 +20,8 @@ from .utils import GameConfig, Images, Sounds, Window
 
 
 class Flappy:
-    def __init__(self, controller_tick):
-        self.controller_tick = controller_tick
+    def __init__(self, controller):
+        self.controller = controller
         pygame.init()
         pygame.display.set_caption("Flappy Bird")
         window = Window(288, 512)
@@ -56,8 +58,8 @@ class Flappy:
         while True:
             for event in pygame.event.get():
                 self.check_quit_event(event)
-                if self.is_tap_event(event):
-                    return
+                # if self.is_tap_event(event):
+                #     return
 
             self.background.tick()
             self.floor.tick()
@@ -67,6 +69,8 @@ class Flappy:
             pygame.display.update()
             await asyncio.sleep(0)
             self.config.tick()
+            self.controller.start()
+            return
 
     def check_quit_event(self, event):
         if event.type == QUIT or (
@@ -94,12 +98,13 @@ class Flappy:
             for i, pipe in enumerate(self.pipes.upper):
                 if self.player.crossed(pipe):
                     self.score.add()
+                    self.controller.score_add()
 
             # for event in pygame.event.get():
             #     self.check_quit_event(event)
             #     if self.is_tap_event(event):
             #         self.player.flap()
-            if self.controller_tick():
+            if self.controller.tick():
                 self.player.flap()
 
             self.background.tick()
@@ -115,24 +120,28 @@ class Flappy:
     async def game_over(self):
         """crashes the player down and shows gameover image"""
 
+        self.controller.game_over()
         self.player.set_mode(PlayerMode.CRASH)
         self.pipes.stop()
         self.floor.stop()
 
-        while True:
-            for event in pygame.event.get():
-                self.check_quit_event(event)
-                if self.is_tap_event(event):
-                    if self.player.y + self.player.h >= self.floor.y - 1:
-                        return
+        pygame.quit()
+        sys.exit()
 
-            self.background.tick()
-            self.floor.tick()
-            self.pipes.tick()
-            self.score.tick()
-            self.player.tick()
-            self.game_over_message.tick()
-
-            self.config.tick()
-            pygame.display.update()
-            await asyncio.sleep(0)
+        # while True:
+        #     for event in pygame.event.get():
+        #         # self.check_quit_event(event)
+        #         if self.is_tap_event(event):
+        #             if self.player.y + self.player.h >= self.floor.y - 1:
+        #                 return
+        #
+        #     self.background.tick()
+        #     self.floor.tick()
+        #     self.pipes.tick()
+        #     self.score.tick()
+        #     self.player.tick()
+        #     self.game_over_message.tick()
+        #
+        #     self.config.tick()
+        #     pygame.display.update()
+        #     await asyncio.sleep(0)
